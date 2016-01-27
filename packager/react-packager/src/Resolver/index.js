@@ -81,21 +81,36 @@ class Resolver {
           (opts.blacklistRE && opts.blacklistRE.test(filepath));
       },
       providesModuleNodeModules: [
-        'fbjs-haste',
-        'react-haste',
+        'fbjs',
+        'react',
         'react-native',
         // Parse requires AsyncStorage. They will
         // change that to require('react-native') which
         // should work after this release and we can
         // remove it from here.
         'parse',
+        'react-transform-hmr',
       ],
       platforms: ['ios', 'android'],
+      preferNativePlatform: true,
       fileWatcher: opts.fileWatcher,
       cache: opts.cache,
+      shouldThrowOnUnresolvedErrors: (_, platform) => platform === 'ios',
     });
 
     this._polyfillModuleNames = opts.polyfillModuleNames || [];
+  }
+
+  getShallowDependencies(entryFile) {
+    return this._depGraph.getShallowDependencies(entryFile);
+  }
+
+  stat(filePath) {
+    return this._depGraph.stat(filePath);
+  }
+
+  getModuleForPath(entryFile) {
+    return this._depGraph.getModuleForPath(entryFile);
   }
 
   getDependencies(main, options) {
@@ -155,7 +170,7 @@ class Resolver {
     );
   }
 
-  wrapModule(resolutionResponse, module, code) {
+  resolveRequires(resolutionResponse, module, code) {
     return Promise.resolve().then(() => {
       if (module.isPolyfill()) {
         return Promise.resolve({code});
@@ -190,10 +205,24 @@ class Resolver {
           .replace(replacePatterns.EXPORT_RE, relativizeCode)
           .replace(replacePatterns.REQUIRE_RE, relativizeCode);
 
-        return module.getName().then(name =>
-          ({name, code: defineModuleCode(name, code)}));
+        return module.getName().then(name => {
+          return {name, code};
+        });
       });
     });
+  }
+
+  wrapModule(resolutionResponse, module, code) {
+    if (module.isPolyfill()) {
+      return Promise.resolve({
+        code: definePolyfillCode(code),
+      });
+    }
+
+    return this.resolveRequires(resolutionResponse, module, code).then(
+      ({name, code}) => {
+        return {name, code: defineModuleCode(name, code)};
+      });
   }
 
   getDebugInfo() {
@@ -209,6 +238,14 @@ function defineModuleCode(moduleName, code) {
     'function(global, require, module, exports) {',
     `  ${code}`,
     '\n});',
+  ].join('');
+}
+
+function definePolyfillCode(code) {
+  return [
+    '(function(global) {',
+    code,
+    `\n})(typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this);`,
   ].join('');
 }
 

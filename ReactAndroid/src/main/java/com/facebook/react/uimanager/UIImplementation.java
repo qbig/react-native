@@ -75,6 +75,10 @@ public class UIImplementation {
     return mShadowNodeRegistry.getNode(reactTag);
   }
 
+  protected final ViewManager resolveViewManager(String className) {
+    return mViewManagers.get(className);
+  }
+
   /**
    * Registers a root node with a given tag, size and ThemedReactContext
    * and adds it to a node registry.
@@ -137,9 +141,9 @@ public class UIImplementation {
 
     mShadowNodeRegistry.addNode(cssNode);
 
-    CatalystStylesDiffMap styles = null;
+    ReactStylesDiffMap styles = null;
     if (props != null) {
-      styles = new CatalystStylesDiffMap(props);
+      styles = new ReactStylesDiffMap(props);
       cssNode.updateProperties(styles);
     }
 
@@ -149,7 +153,7 @@ public class UIImplementation {
   protected void handleCreateView(
       ReactShadowNode cssNode,
       int rootViewTag,
-      @Nullable CatalystStylesDiffMap styles) {
+      @Nullable ReactStylesDiffMap styles) {
     if (!cssNode.isVirtual()) {
       mNativeViewHierarchyOptimizer.handleCreateView(cssNode, cssNode.getThemedContext(), styles);
     }
@@ -169,7 +173,7 @@ public class UIImplementation {
     }
 
     if (props != null) {
-      CatalystStylesDiffMap styles = new CatalystStylesDiffMap(props);
+      ReactStylesDiffMap styles = new ReactStylesDiffMap(props);
       cssNode.updateProperties(styles);
       handleUpdateView(cssNode, className, styles);
     }
@@ -178,7 +182,7 @@ public class UIImplementation {
   protected void handleUpdateView(
       ReactShadowNode cssNode,
       String className,
-      CatalystStylesDiffMap styles) {
+      ReactStylesDiffMap styles) {
     if (!cssNode.isVirtual()) {
       mNativeViewHierarchyOptimizer.handleUpdateView(cssNode, className, styles);
     }

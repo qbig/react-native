@@ -3,28 +3,51 @@ include_defs('//ReactAndroid/DEFS')
 # We depend on JSC, support the same platforms
 SUPPORTED_PLATFORMS = '^android-(armv7|x86)$'
 
-cxx_library(
-  name = 'jni',
+DEPS = [
+  '//native/jni:jni',
+  '//xplat/folly:molly',
+]
+
+def jni_library(**kwargs):
+  cxx_library(
+    name='jni',
+    visibility = [
+      'PUBLIC',
+    ],
+    deps = DEPS + [
+      react_native_target('jni/react:react'),
+      '//native/third-party/jsc:jsc',
+      '//native/third-party/jsc:jsc_legacy_profiler',
+    ],
+    **kwargs
+  )
+
+jni_library(
   soname = 'libreactnativejni.so',
   header_namespace = 'react/jni',
   supported_platforms_regex = SUPPORTED_PLATFORMS,
   srcs = [
+    'JMessageQueueThread.cpp',
+    'JSLoader.cpp',
     'NativeArray.cpp',
     'OnLoad.cpp',
     'ProxyExecutor.cpp',
-    'JSLoader.cpp',
   ],
   headers = [
-    'ProxyExecutor.h',
     'JSLoader.h',
+    'ProxyExecutor.h',
   ],
   exported_headers = [
+    'JMessageQueueThread.h',
+    'JNativeRunnable.h',
     'NativeArray.h',
     'ReadableNativeArray.h',
+    'WebWorkers.h',
   ],
   preprocessor_flags = [
     '-DLOG_TAG="ReactNativeJNI"',
     '-DWITH_FBSYSTRACE=1',
+    '-DWITH_FBJSCEXTENSIONS=1',
   ],
   compiler_flags = [
     '-Wall',
@@ -33,18 +56,6 @@ cxx_library(
     '-std=c++11',
     '-fvisibility=hidden',
     '-frtti',
-  ],
-  visibility = [
-    react_native_target('java/com/facebook/react/bridge:bridge'),
-    react_native_target('jni/react/...'),
-    react_native_dep('native/react/...')
-  ],
-  deps = [
-    react_native_target('jni/react:react'),
-    '//native/jni:jni',
-    '//native/third-party/jsc:jsc',
-    '//native/third-party/jsc:jsc_legacy_profiler',
-    '//xplat/folly:json',
   ],
 )
 

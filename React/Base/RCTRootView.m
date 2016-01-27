@@ -14,7 +14,7 @@
 #import <objc/runtime.h>
 
 #import "RCTAssert.h"
-#import "RCTBridge.h"
+#import "RCTBridge+Private.h"
 #import "RCTEventDispatcher.h"
 #import "RCTKeyCommands.h"
 #import "RCTLog.h"
@@ -28,12 +28,6 @@
 
 NSString *const RCTContentDidAppearNotification = @"RCTContentDidAppearNotification";
 
-@interface RCTBridge (RCTRootView)
-
-@property (nonatomic, weak, readonly) RCTBridge *batchedBridge;
-
-@end
-
 @interface RCTUIManager (RCTRootView)
 
 - (NSNumber *)allocateRootTag;
@@ -43,6 +37,8 @@ NSString *const RCTContentDidAppearNotification = @"RCTContentDidAppearNotificat
 @interface RCTRootContentView : RCTView <RCTInvalidating>
 
 @property (nonatomic, readonly) BOOL contentHasAppeared;
+
+@property (nonatomic, readonly, strong) RCTTouchHandler *touchHandler;
 
 - (instancetype)initWithFrame:(CGRect)frame bridge:(RCTBridge *)bridge NS_DESIGNATED_INITIALIZER;
 
@@ -263,6 +259,11 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   [_contentView invalidate];
 }
 
+- (void)cancelTouches
+{
+  [[_contentView touchHandler] cancel];
+}
+
 @end
 
 @implementation RCTUIManager (RCTRootView)
@@ -279,7 +280,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 @implementation RCTRootContentView
 {
   __weak RCTBridge *_bridge;
-  RCTTouchHandler *_touchHandler;
   UIColor *_backgroundColor;
 }
 
@@ -341,7 +341,8 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithCoder:(nonnull NSCoder *)aDecoder)
    * the react tag is assigned every time we load new content.
    */
   self.reactTag = [_bridge.uiManager allocateRootTag];
-  [self addGestureRecognizer:[[RCTTouchHandler alloc] initWithBridge:_bridge]];
+  _touchHandler = [[RCTTouchHandler alloc] initWithBridge:_bridge];
+  [self addGestureRecognizer:_touchHandler];
   [_bridge.uiManager registerRootView:self];
 }
 

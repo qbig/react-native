@@ -71,7 +71,7 @@ const viewConfig = {
 const Text = React.createClass({
   propTypes: {
     /**
-     * Used to truncate the text with an elipsis after computing the text
+     * Used to truncate the text with an ellipsis after computing the text
      * layout, including line wrapping, such that the total number of lines
      * does not exceed this number.
      */
@@ -99,6 +99,7 @@ const Text = React.createClass({
     testID: React.PropTypes.string,
     /**
      * Specifies should fonts scale to respect Text Size accessibility setting on iOS.
+     * @platform ios
      */
     allowFontScaling: React.PropTypes.bool,
   },
@@ -181,35 +182,35 @@ const Text = React.createClass({
             }
             return setResponder;
           },
-          onResponderGrant: (e: SyntheticEvent, dispatchID: string) => {
+          onResponderGrant: function(e: SyntheticEvent, dispatchID: string) {
             this.touchableHandleResponderGrant(e, dispatchID);
             this.props.onResponderGrant &&
               this.props.onResponderGrant.apply(this, arguments);
-          },
-          onResponderMove: (e: SyntheticEvent) => {
+          }.bind(this),
+          onResponderMove: function(e: SyntheticEvent) {
             this.touchableHandleResponderMove(e);
             this.props.onResponderMove &&
               this.props.onResponderMove.apply(this, arguments);
-          },
-          onResponderRelease: (e: SyntheticEvent) => {
+          }.bind(this),
+          onResponderRelease: function(e: SyntheticEvent) {
             this.touchableHandleResponderRelease(e);
             this.props.onResponderRelease &&
               this.props.onResponderRelease.apply(this, arguments);
-          },
-          onResponderTerminate: (e: SyntheticEvent) => {
+          }.bind(this),
+          onResponderTerminate: function(e: SyntheticEvent) {
             this.touchableHandleResponderTerminate(e);
             this.props.onResponderTerminate &&
               this.props.onResponderTerminate.apply(this, arguments);
-          },
-          onResponderTerminationRequest: (): bool => {
+          }.bind(this),
+          onResponderTerminationRequest: function(): bool {
             // Allow touchable or props.onResponderTerminationRequest to deny
             // the request
             var allowTermination = this.touchableHandleResponderTerminationRequest();
             if (allowTermination && this.props.onResponderTerminationRequest) {
-              allowTermination = this.props.onResponderTerminationRequest();
+              allowTermination = this.props.onResponderTerminationRequest.apply(this, arguments);
             }
             return allowTermination;
-          },
+          }.bind(this),
         };
       }
       newProps = {

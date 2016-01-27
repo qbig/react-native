@@ -198,11 +198,12 @@ var components = [
   '../Libraries/Picker/PickerIOS.ios.js',
   '../Libraries/Components/ProgressBarAndroid/ProgressBarAndroid.android.js',
   '../Libraries/Components/ProgressViewIOS/ProgressViewIOS.ios.js',
+  '../Libraries/PullToRefresh/PullToRefreshViewAndroid.android.js',
+  '../Libraries/Components/RefreshControl/RefreshControl.js',
   '../Libraries/Components/ScrollView/ScrollView.js',
   '../Libraries/Components/SegmentedControlIOS/SegmentedControlIOS.ios.js',
   '../Libraries/Components/SliderIOS/SliderIOS.ios.js',
-  '../Libraries/Components/SwitchAndroid/SwitchAndroid.android.js',
-  '../Libraries/Components/SwitchIOS/SwitchIOS.ios.js',
+  '../Libraries/Components/Switch/Switch.js',
   '../Libraries/Components/TabBarIOS/TabBarIOS.ios.js',
   '../Libraries/Components/TabBarIOS/TabBarItemIOS.ios.js',
   '../Libraries/Text/Text.js',
@@ -219,14 +220,17 @@ var components = [
 
 var apis = [
   '../Libraries/ActionSheetIOS/ActionSheetIOS.js',
+  '../Libraries/Utilities/Alert.js',
   '../Libraries/Utilities/AlertIOS.js',
   '../Libraries/Animated/src/AnimatedImplementation.js',
   '../Libraries/AppRegistry/AppRegistry.js',
   '../Libraries/AppStateIOS/AppStateIOS.ios.js',
+  '../Libraries/AppState/AppState.js',
   '../Libraries/Storage/AsyncStorage.js',
   '../Libraries/Utilities/BackAndroid.android.js',
   '../Libraries/CameraRoll/CameraRoll.js',
   '../Libraries/Utilities/Dimensions.js',
+  '../Libraries/Components/Intent/IntentAndroid.android.js',
   '../Libraries/Interaction/InteractionManager.js',
   '../Libraries/LayoutAnimation/LayoutAnimation.js',
   '../Libraries/LinkingIOS/LinkingIOS.js',
@@ -263,7 +267,11 @@ var styleDocs = styles.slice(2).reduce(function(docs, filepath) {
     docgen.parse(
       fs.readFileSync(filepath),
       docgenHelpers.findExportedObject,
-      [docgen.handlers.propTypeHandler, docgen.handlers.propTypeCompositionHandler]
+      [
+        docgen.handlers.propTypeHandler,
+        docgen.handlers.propTypeCompositionHandler,
+        docgen.handlers.propDocBlockHandler,
+      ]
     );
 
   return docs;

@@ -13,15 +13,9 @@
 
 #import "RCTAssert.h"
 #import "RCTBridge.h"
+#import "RCTBridge+Private.h"
 #import "RCTDefines.h"
 #import "RCTRedBox.h"
-
-@interface RCTBridge ()
-
-+ (RCTBridge *)currentBridge;
-- (void)logMessage:(NSString *)message level:(NSString *)level;
-
-@end
 
 static NSString *const RCTLogFunctionStack = @"RCTLogFunctionStack";
 
@@ -169,7 +163,7 @@ NSString *RCTFormatLog(
     [log appendString:[formatter stringFromDate:timestamp]];
   }
   if (level) {
-    [log appendFormat:@"[%s]", RCTLogLevels[level - 1]];
+    [log appendFormat:@"[%s]", RCTLogLevels[level]];
   }
 
   [log appendFormat:@"[tid:%@]", RCTCurrentThreadName()];
